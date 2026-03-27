@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Skin Analyzer</title>
+</head>
+<body style="text-align:center; font-family:sans-serif;">
+
+  <h1>🔬 วิเคราะห์ผิว (คลิกเลือกจุด)</h1>
+
+  <input type="file" id="upload" accept="image/*"><br><br>
+
+  <canvas id="canvas" width="300" height="300" style="border:1px solid black;"></canvas>
+
+  <h2 id="result">ค่า RGB: -</h2>
+  <h3 id="level">ระดับ: -</h3>
+
+  <div id="colorBox" style="width:100px;height:100px;margin:auto;border:1px solid black;"></div>
+
+  <script>
+    const upload = document.getElementById("upload");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const result = document.getElementById("result");
+    const level = document.getElementById("level");
+    const colorBox = document.getElementById("colorBox");
+
+    let imgLoaded = false;
+
+    upload.addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      const img = new Image();
+
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0, 300, 300);
+        imgLoaded = true;
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+
+    canvas.addEventListener("click", function(event) {
+      if (!imgLoaded) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+
+      const r = pixel[0];
+      const g = pixel[1];
+      const b = pixel[2];
+
+      result.innerText = `ค่า RGB: (${r}, ${g}, ${b})`;
+
+      if (r > 180) {
+        level.innerText = "ระดับ: อักเสบสูง 🔴";
+      } else if (r > 120) {
+        level.innerText = "ระดับ: อักเสบปานกลาง 🟠";
+      } else {
+        level.innerText = "ระดับ: อักเสบน้อย 🟢";
+      }
+
+      colorBox.style.backgroundColor = `rgb(${r},${g},${b})`;
+    });
+  </script>
+
+</body>
+</html>
